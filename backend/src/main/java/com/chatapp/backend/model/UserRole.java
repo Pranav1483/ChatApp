@@ -32,4 +32,5 @@ public class UserRole {
 
     @Column(nullable = false)
     private Set<Role> roles;
+    
 }
