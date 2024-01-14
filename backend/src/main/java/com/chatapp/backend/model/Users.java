@@ -66,5 +66,6 @@ public class Users {
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
+        status = UserStatus.OFFLINE;
     }
 }
