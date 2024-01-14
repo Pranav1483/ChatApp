@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table (name = "Users")
-public class Users {
+@Table (name = "User")
+public class User {
     
     @Id
     @GeneratedValue

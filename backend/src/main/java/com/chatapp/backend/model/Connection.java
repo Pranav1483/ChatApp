@@ -29,10 +29,10 @@ public class Connection {
     private Long id;
 
     @Column(nullable = false)
-    private Users user_from;
+    private User user_from;
 
     @Column(nullable = false)
-    private Users user_to;
+    private User user_to;
 
     @Column(nullable = false)
     private ConnectionStatus status;

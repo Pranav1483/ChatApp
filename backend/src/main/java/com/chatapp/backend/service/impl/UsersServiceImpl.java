@@ -3,7 +3,7 @@ package com.chatapp.backend.service.impl;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.chatapp.backend.model.Users;
+import com.chatapp.backend.model.User;
 import com.chatapp.backend.repository.UsersRepository;
 import com.chatapp.backend.service.UsersService;
 
@@ -19,7 +19,7 @@ public class UsersServiceImpl implements UsersService{
     }
 
     @Override
-    public Users saveUser(Users user) {
+    public User saveUser(User user) {
         
     }
     

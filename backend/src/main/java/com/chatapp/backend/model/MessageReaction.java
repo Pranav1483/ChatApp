@@ -24,7 +24,7 @@ public class MessageReaction {
     private Long id;
 
     @Column(nullable = false)
-    private Users user;
+    private User user;
 
     @Column(nullable = false)
     private Message message;

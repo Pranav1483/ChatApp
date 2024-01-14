@@ -35,7 +35,7 @@ public class Group {
     private String description;
 
     @Column(nullable = false, updatable = false)
-    private Users createdBy;
+    private User createdBy;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

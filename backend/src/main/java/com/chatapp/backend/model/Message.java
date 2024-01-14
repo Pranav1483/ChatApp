@@ -41,10 +41,10 @@ public class Message {
     private boolean oneTime;
 
     @Column(nullable = false)
-    private Users user_from;
+    private User user_from;
 
     @Column
-    private Users user_to;
+    private User user_to;
 
     @Column
     private Group group_to;
