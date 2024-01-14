@@ -22,6 +22,7 @@ public class UserRole {
     
     @Id
     @GeneratedValue
+    @Column(updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)
@@ -32,5 +33,5 @@ public class UserRole {
 
     @Column(nullable = false)
     private Set<Role> roles;
-    
+
 }

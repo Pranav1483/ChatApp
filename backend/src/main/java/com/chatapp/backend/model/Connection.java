@@ -22,6 +22,7 @@ public class Connection {
     
     @Id
     @GeneratedValue
+    @Column(updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)

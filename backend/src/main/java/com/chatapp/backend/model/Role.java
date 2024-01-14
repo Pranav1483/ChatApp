@@ -21,6 +21,7 @@ public class Role {
     
     @Id
     @GeneratedValue
+    @Column(updatable = false, nullable = false)
     private Long id;
 
     @Column(nullable = false)
