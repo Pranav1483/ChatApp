@@ -1,5 +1,7 @@
 package com.chatapp.backend.model;
 
+import java.time.LocalDateTime;
+
 import com.chatapp.backend.enm.ConnectionStatus;
 
 import jakarta.persistence.Column;
@@ -33,4 +35,7 @@ public class Connection {
 
     @Column(nullable = false)
     private ConnectionStatus status;
+
+    @Column(nullable = false)
+    private LocalDateTime lastUpdate;
 }
