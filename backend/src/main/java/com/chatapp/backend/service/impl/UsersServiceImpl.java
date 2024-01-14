@@ -10,17 +10,18 @@ import com.chatapp.backend.service.UsersService;
 @Service
 public class UsersServiceImpl implements UsersService{
 
-    private UsersRepository usersRepository;
+    private UsersRepository userRepository;
     private PasswordEncoder passwordEncoder;
 
-    public UsersServiceImpl(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
-        this.usersRepository = usersRepository;
+    public UsersServiceImpl(UsersRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User saveUser(User user) {
-        
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
     
 }
