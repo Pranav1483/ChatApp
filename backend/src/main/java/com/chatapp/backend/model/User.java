@@ -67,5 +67,6 @@ public class User {
     public void prePersist() {
         createdAt = LocalDateTime.now();
         status = UserStatus.OFFLINE;
+        profilePic = "default";
     }
 }
