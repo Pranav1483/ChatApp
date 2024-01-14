@@ -50,7 +50,7 @@ public class Users {
     @Size(min = 60, max = 256)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -61,5 +61,5 @@ public class Users {
 
     @Column(nullable = false)
     private String profilePic;
-    
+
 }
