@@ -60,5 +60,6 @@ public class Message {
     public void prePersist() {
         createdAt = LocalDateTime.now();
         status = MessageStatus.SENT;
+        oneTime = false;
     }
 }

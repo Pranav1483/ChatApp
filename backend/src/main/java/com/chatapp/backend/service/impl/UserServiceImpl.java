@@ -36,9 +36,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void updateUser(User user) {
-        if (user != null) {
-            userRepository.save(user);
-        }
+        userRepository.save(user);
     }
     
 }
