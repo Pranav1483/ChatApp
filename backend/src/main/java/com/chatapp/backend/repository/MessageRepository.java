@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface MessageRepository extends JpaRepository<Message, Long>{
     
     Optional<Message> findById(Long id);
-    List<Message> findByUser_fromAndUser_toOrUser_fromAndUser_toOrderByCreatedAtDesc(User user1, User user2, User user2Again, User user1Again, Pageable pageable);
-    List<Message> findByUser_fromAndGroup_toOrderByCreatedAtDesc(User user, Group group, Pageable pageable);
+    List<Message> findByUserFromAndUserToOrUserFromAndUserToOrderByCreatedAtDesc(User userFrom1, User userTo1, User userFrom2, User userTo2, Pageable pageable);
+    List<Message> findByUserFromAndGroupToOrderByCreatedAtDesc(User user, Group group, Pageable pageable);
 
 }

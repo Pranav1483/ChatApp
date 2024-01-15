@@ -26,7 +26,7 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public Message saveMessage(Message message) {
-        if ((message.getUser_to() == null && message.getGroup_to() == null) || (message.getUser_to() != null && message.getGroup_to() != null)) {
+        if ((message.getUserTo() == null && message.getGroupTo() == null) || (message.getUserTo() != null && message.getGroupTo() != null)) {
             throw new IllegalArgumentException("Both user_to and group_to cannot be simultaneously empty or filled");
         }
         if (message.getType() != MessageType.TXT && message.getContentURL() == null) {
@@ -48,7 +48,7 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public void updateMessage(Message message) {
-        if ((message.getUser_to() == null && message.getGroup_to() == null) || (message.getUser_to() != null && message.getGroup_to() != null)) {
+        if ((message.getUserTo() == null && message.getGroupTo() == null) || (message.getUserTo() != null && message.getGroupTo() != null)) {
             throw new IllegalArgumentException("Both user_to and group_to cannot be simultaneously empty or filled");
         }
         if (message.getType() != MessageType.TXT && message.getContentURL() == null) {
@@ -60,14 +60,14 @@ public class MessageServiceImpl implements MessageService{
     @Override
     public List<Message> getUserConvo(User user_from, User user_to, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<Message> messages = messageRepository.findByUser_fromAndUser_toOrUser_fromAndUser_toOrderByCreatedAtDesc(user_from, user_to, user_to, user_from, pageable);
+        List<Message> messages = messageRepository.findByUserFromAndUserToOrUserFromAndUserToOrderByCreatedAtDesc(user_from, user_to, user_to, user_from, pageable);
         return messages;
     }
 
     @Override
     public List<Message> getGroupConvo(User user_from, Group group_to, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<Message> messages = messageRepository.findByUser_fromAndGroup_toOrderByCreatedAtDesc(user_from, group_to, pageable);
+        List<Message> messages = messageRepository.findByUserFromAndGroupToOrderByCreatedAtDesc(user_from, group_to, pageable);
         return messages;
     }
 
