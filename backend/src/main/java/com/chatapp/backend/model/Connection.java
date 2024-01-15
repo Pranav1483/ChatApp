@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "Connection")
+@Table(name = "Connection", uniqueConstraints = @UniqueConstraint(columnNames = {"userFrom_id", "userTo_id"}))
 public class Connection {
     
     @Id
@@ -31,12 +32,12 @@ public class Connection {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_from_id", nullable = false)
-    private User user_from;
+    @JoinColumn(name = "userFrom_id", nullable = false)
+    private User userFrom;
 
     @ManyToOne
-    @JoinColumn(name = "user_to_id", nullable = false)
-    private User user_to;
+    @JoinColumn(name = "userTo_id", nullable = false)
+    private User userTo;
 
     @Column(nullable = false)
     private ConnectionStatus status;
