@@ -2,6 +2,7 @@ package com.chatapp.backend.model;
 
 import java.time.LocalDateTime;
 
+import com.chatapp.backend.enm.MessageStatus;
 import com.chatapp.backend.enm.MessageType;
 
 import jakarta.persistence.Column;
@@ -25,7 +26,7 @@ public class Message {
     
     @Id
     @GeneratedValue
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private Long id;
 
     @Column(nullable = false)
@@ -52,8 +53,12 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private MessageStatus status;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
+        status = MessageStatus.SENT;
     }
 }
