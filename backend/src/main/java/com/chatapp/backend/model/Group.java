@@ -49,6 +49,7 @@ public class Group {
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
+        profilePic = "default";
     }
 
 }
