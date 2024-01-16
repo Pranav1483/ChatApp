@@ -3,6 +3,7 @@ package com.chatapp.backend.dto;
 import java.time.LocalDateTime;
 
 import com.chatapp.backend.enm.UserStatus;
+import com.chatapp.backend.model.User;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,5 +20,16 @@ public class UserDTOForUser {
     private LocalDateTime createdAt;
     private UserStatus status;
     private String profilePic;
+
+    public UserDTOForUser(User user) {
+        this.id = user.getId();
+        this.fname = user.getFname();
+        this.lname = user.getLname();
+        this.email = user.getEmail();
+        this.username = user.getUsername();
+        this.createdAt = user.getCreatedAt();
+        this.status = user.getStatus();
+        this.profilePic = user.getProfilePic();
+    }
     
 }
