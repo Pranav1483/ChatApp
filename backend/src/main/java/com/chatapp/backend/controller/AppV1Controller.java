@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,30 +54,34 @@ public class AppV1Controller {
                                 this.userService = userService;
                             }
     
+    @GetMapping("/public/status")
+    public ResponseEntity<String> statusCheck() {
+        return ResponseEntity.status(200).body("OK");
+    }
     
-                            @PostMapping("/user")
-                            public ResponseEntity<?> createUser(@RequestBody User user, BindingResult bindingResult) {
-                                if (bindingResult.hasErrors()) {
-                                    FieldError fieldError = bindingResult.getFieldErrors().get(0);
-                                    String errMsg = fieldError.getDefaultMessage();
-                                    return ResponseEntity.status(400).body(errMsg);
-                                }
-                                try {
-                                    userService.saveUser(user);
-                                    return ResponseEntity.status(200).body(new UserDTOForUser(user));
-                                } catch (DataIntegrityViolationException e) {
-                                    String errMsg = "";
-                                    String violatedField = e.getMessage();
-                                    System.out.println(violatedField);
-                                    if (violatedField.contains("username")) {
-                                        errMsg = "Username already exists";
-                                    }
-                                    else if (violatedField.contains("email")) {
-                                        errMsg = "Email already exists";
-                                    }
-                                    return ResponseEntity.status(409).body(errMsg);
-                                } catch (Exception e) {
-                                    return ResponseEntity.status(500).body("");
-                                }
-                            }
+    @PostMapping("/user")
+    public ResponseEntity<?> createUser(@RequestBody User user, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            FieldError fieldError = bindingResult.getFieldErrors().get(0);
+            String errMsg = fieldError.getDefaultMessage();
+            return ResponseEntity.status(400).body(errMsg);
+        }
+        try {
+            userService.saveUser(user);
+            return ResponseEntity.status(200).body(new UserDTOForUser(user));
+        } catch (DataIntegrityViolationException e) {
+            String errMsg = "";
+            String violatedField = e.getMessage();
+            System.out.println(violatedField);
+            if (violatedField.contains("username")) {
+                errMsg = "Username already exists";
+            }
+            else if (violatedField.contains("email")) {
+                errMsg = "Email already exists";
+            }
+            return ResponseEntity.status(409).body(errMsg);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("");
+        }
+    }
 }
