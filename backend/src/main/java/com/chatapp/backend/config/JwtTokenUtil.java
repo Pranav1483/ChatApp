@@ -7,7 +7,9 @@ import java.util.function.Function;
 
 import javax.crypto.SecretKey;
 
-import com.chatapp.backend.dto.UserDTOForAnon;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
 import com.chatapp.backend.model.Constants;
 
 import io.jsonwebtoken.Claims;
@@ -15,6 +17,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+@Component
 public class JwtTokenUtil {
 
     private String createToken(Map<String, Object> claims, String username) {
@@ -56,7 +59,7 @@ public class JwtTokenUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, UserDTOForAnon userDetails) {
+    public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
