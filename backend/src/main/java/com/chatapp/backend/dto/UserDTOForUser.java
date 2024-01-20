@@ -20,6 +20,7 @@ public class UserDTOForUser {
     private LocalDateTime createdAt;
     private UserStatus status;
     private String profilePic;
+    private LocalDateTime lastActive;
 
     public UserDTOForUser(User user) {
         this.id = user.getId();
@@ -30,6 +31,7 @@ public class UserDTOForUser {
         this.createdAt = user.getCreatedAt();
         this.status = user.getStatus();
         this.profilePic = user.getProfilePic();
+        this.lastActive = user.getLastActive();
     }
     
 }
