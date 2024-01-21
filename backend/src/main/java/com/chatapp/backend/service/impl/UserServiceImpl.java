@@ -3,7 +3,8 @@ package com.chatapp.backend.service.impl;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.chatapp.backend.model.User;
@@ -13,14 +14,11 @@ import com.chatapp.backend.service.UserService;
 @Service
 public class UserServiceImpl implements UserService{
 
+    @Autowired
     private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public User saveUser(User user) {
