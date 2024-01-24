@@ -2,7 +2,6 @@ package com.chatapp.backend.dto;
 
 import java.time.LocalDateTime;
 
-import com.chatapp.backend.enm.UserStatus;
 import com.chatapp.backend.model.User;
 
 import lombok.Getter;
@@ -18,7 +17,7 @@ public class UserDTOForUser {
     private String email;
     private String username;
     private LocalDateTime createdAt;
-    private UserStatus status;
+    private String status;
     private String profilePic;
     private LocalDateTime lastActive;
 
@@ -29,7 +28,13 @@ public class UserDTOForUser {
         this.email = user.getEmail();
         this.username = user.getUsername();
         this.createdAt = user.getCreatedAt();
-        this.status = user.getStatus();
+        switch (user.getStatus()) {
+            case OFFLINE:
+                this.status = "OFFLINE";
+                break;
+            case ONLINE:
+                this.status = "ONLINE";
+        }
         this.profilePic = user.getProfilePic();
         this.lastActive = user.getLastActive();
     }

@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "Group")
+@Table(name = "Chat_Group")
 public class Group {
     
     @Id

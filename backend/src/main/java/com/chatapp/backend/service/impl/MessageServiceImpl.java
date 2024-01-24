@@ -8,20 +8,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.chatapp.backend.dto.MessageDTO;
 import com.chatapp.backend.enm.MessageType;
 import com.chatapp.backend.model.Group;
 import com.chatapp.backend.model.Message;
 import com.chatapp.backend.model.User;
+import com.chatapp.backend.repository.GroupRepository;
 import com.chatapp.backend.repository.MessageRepository;
+import com.chatapp.backend.repository.UserRepository;
 import com.chatapp.backend.service.MessageService;
 
 @Service
 public class MessageServiceImpl implements MessageService{
     
     private MessageRepository messageRepository;
+    private UserRepository userRepository;
+    private GroupRepository groupRepository;
 
-    public MessageServiceImpl(MessageRepository messageRepository) {
+    public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, GroupRepository groupRepository) {
         this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Override
@@ -69,6 +76,41 @@ public class MessageServiceImpl implements MessageService{
         Pageable pageable = PageRequest.of(page, size);
         List<Message> messages = messageRepository.findByUserFromAndGroupToOrderByCreatedAtDesc(user_from, group_to, pageable);
         return messages;
+    }
+
+    @Override
+    public Message DTOtoMessage(MessageDTO messageDTO, Long ToId, Boolean toGroup) {
+        Message message = new Message();
+        message.setContent(messageDTO.getContent());
+        switch(messageDTO.getType()) {
+            case "TXT":
+                message.setType(MessageType.TXT);
+                break;
+            case "AUD":
+                message.setType(MessageType.AUD);
+                break;
+            case "VID":
+                message.setType(MessageType.VID);
+                break;
+            case "IMG":
+                message.setType(MessageType.IMG);
+                break;
+            case "DOC":
+                message.setType(MessageType.DOC);
+                break;
+            case "ZIP":
+                message.setType(MessageType.ZIP);
+                break;
+        }
+        message.setContentURL(messageDTO.getContentURL());
+        message.setOneTime(messageDTO.getOneTime());
+        message.setUserFrom(userRepository.findByUsername(messageDTO.getUserFrom()).get());
+        if (toGroup) {
+            message.setGroupTo(groupRepository.findById(ToId).get());
+        } else {
+            message.setUserTo(userRepository.findById(ToId).get());
+        }
+        return message;
     }
 
 }

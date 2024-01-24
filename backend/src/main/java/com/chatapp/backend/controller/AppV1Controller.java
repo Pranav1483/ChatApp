@@ -2,13 +2,16 @@ package com.chatapp.backend.controller;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -24,11 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.chatapp.backend.config.JwtTokenUtil;
+import com.chatapp.backend.dto.MessageDTO;
+import com.chatapp.backend.dto.MessageRequestDTO;
 import com.chatapp.backend.dto.UserDTOForAnon;
 import com.chatapp.backend.dto.UserDTOForUser;
 import com.chatapp.backend.enm.UserStatus;
 import com.chatapp.backend.model.AuthRequest;
 import com.chatapp.backend.model.Constants;
+import com.chatapp.backend.model.LatestMessage;
 import com.chatapp.backend.model.Message;
 import com.chatapp.backend.model.User;
 import com.chatapp.backend.service.ConnectionService;
@@ -86,13 +92,13 @@ public class AppV1Controller {
     }
 
     @GetMapping("/startup")
-    public ResponseEntity<String> startup(@RequestHeader(Constants.HEADER_STRING) String tokenHeader) {
+    public ResponseEntity<UserDTOForUser> startup(@RequestHeader(Constants.HEADER_STRING) String tokenHeader) {
         String token = tokenHeader.replace(Constants.TOKEN_PREFIX, "");
         String username = jwtTokenUtil.getUsernameFromToken(token);
         User user = userService.getUserByUsername(username);
         user.setStatus(UserStatus.ONLINE);
-        userService.saveUser(user);
-        return ResponseEntity.status(200).body("OK");
+        userService.updateUser(user);
+        return ResponseEntity.status(200).body(new UserDTOForUser(user));
     }
 
     @GetMapping("/exit")
@@ -102,7 +108,7 @@ public class AppV1Controller {
         User user = userService.getUserByUsername(username);
         user.setStatus(UserStatus.OFFLINE);
         user.setLastActive(LocalDateTime.now());
-        userService.saveUser(user);
+        userService.updateUser(user);
         return ResponseEntity.status(200).body("OK");
     }
     
@@ -119,7 +125,6 @@ public class AppV1Controller {
         } catch (DataIntegrityViolationException e) {
             String errMsg = "";
             String violatedField = e.getMessage();
-            System.out.println(violatedField);
             if (violatedField.contains("username")) {
                 errMsg = "Username already exists";
             }
@@ -149,39 +154,96 @@ public class AppV1Controller {
     public ResponseEntity<String> loginUser(@RequestBody AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
-            if (authentication.isAuthenticated()) {
-                return ResponseEntity.status(200).body(jwtTokenUtil.generateToken(authRequest.getUsername()));
-            } else {
-                return ResponseEntity.status(401).body("");
-            }
+            if (authentication.isAuthenticated()) return ResponseEntity.status(200).body(jwtTokenUtil.generateToken(authRequest.getUsername()));
+            else return ResponseEntity.status(401).body("Bad Creds");
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Bad Creds");
         } catch (Exception e){
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+            return ResponseEntity.status(403).body(e.getMessage());
+        }     
     }
 
     @GetMapping("/sse/connect/{username}")
-    public SseEmitter connect(@PathVariable String username, @RequestHeader(Constants.HEADER_STRING) String tokenHeader) {
+    public SseEmitter connect(@PathVariable String username) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        if (username.equals(jwtTokenUtil.getUsernameFromToken(tokenHeader.replace(Constants.TOKEN_PREFIX, "")))) {
-            try {
-                emitter.send(SseEmitter.event().name("INIT"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            emitters.put(username, emitter);
-            emitter.onTimeout(() -> emitters.remove(username, emitter));
-            emitter.onCompletion(() -> emitters.remove(username, emitter));
-            return emitter;
+        try {
+            emitter.send(SseEmitter.event().name("INIT"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        else throw new AuthorizationServiceException("Not Authorized");
+        emitters.put(username, emitter);
+        emitter.onTimeout(() -> emitters.remove(username, emitter));
+        emitter.onCompletion(() -> emitters.remove(username, emitter));
+        return emitter;
     }
 
     @PostMapping("/sse/user")
-    public void dispatchEvent(@RequestBody Message message, @RequestHeader(Constants.HEADER_STRING) String tokenHeader) throws IOException {
-        if (message.getUserFrom().getUsername().equals(jwtTokenUtil.getUsernameFromToken(tokenHeader.replace(Constants.TOKEN_PREFIX, "")))) {
-            SseEmitter emitter = emitters.get(message.getUserTo().getUsername());
-            emitter.send(message);
-        } else throw new AuthorizationServiceException("Not Authorized");
-    } 
-    
+    public void dispatchEvent(@RequestBody MessageRequestDTO messageRequestDTO) throws IOException {
+        Message message = messageService.DTOtoMessage(messageRequestDTO.getMessageDTO(), messageRequestDTO.getToId(), messageRequestDTO.getToGroup());
+        messageService.saveMessage(message);
+        SseEmitter emitter = emitters.get(message.getUserTo().getUsername());
+        emitter.send(new MessageDTO(message));
+    }
+
+    @GetMapping("/message/{id}")
+    public ResponseEntity<Message> getMessage(@PathVariable Long id) {
+        Message message = messageService.getMessage(id);
+        return ResponseEntity.status(200).body(message);
+    }
+
+    @GetMapping("/message/user/{id}")
+    public ResponseEntity<List<MessageDTO>> getUserMessages(@PathVariable String id) {
+        String[] ids = id.split("-");
+        Long userFromId = Long.parseLong(ids[0]);
+        Long userToId = Long.parseLong(ids[1]);
+        User userFrom = userService.getUserById(userFromId);
+        User usetTo = userService.getUserById(userToId);
+        List<Message> messages = messageService.getUserConvo(userFrom, usetTo, 0, 100);
+        List<MessageDTO> messageDTOs = new ArrayList<>();
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            messageDTOs.add(new MessageDTO(messages.get(i)));
+        }
+        return ResponseEntity.status(200).body(messageDTOs);
+    }
+
+    @GetMapping("/latestmessage/{id}")
+    public ResponseEntity<String> addLatestMessage(@PathVariable String id) {
+        String[] ids = id.split("-");
+        Long userFromId = Long.parseLong(ids[0]);
+        Long userToId = Long.parseLong(ids[1]);
+        Long messageId = Long.parseLong(ids[2]);
+        User userFrom = userService.getUserById(userFromId);
+        User userTo = userService.getUserById(userToId);
+        Message message = messageService.getMessage(messageId);
+        try {
+            LatestMessage latestMessage = latestMessageService.getByUsers(userFrom, userTo);
+            latestMessage.setMessage(message);
+            latestMessageService.saveLatestMessage(latestMessage);
+            return ResponseEntity.status(200).body("OK");
+        } catch(Exception e) {
+            LatestMessage latestMessage = new LatestMessage();
+            latestMessage.setUser(userFrom);
+            latestMessage.setInboxUser(userTo);
+            latestMessage.setMessage(message);
+            latestMessageService.saveLatestMessage(latestMessage);
+            return ResponseEntity.status(200).body("OK");
+        }
+    }
+
+    @GetMapping("/inbox/{username}")
+    public ResponseEntity<List<UserDTOForUser>> getUserInbox(@PathVariable String username) {
+        User user = userService.getUserByUsername(username);
+        List<LatestMessage> inboxMessages = latestMessageService.getByUser(user);
+        List<UserDTOForUser> res = new ArrayList<>();
+        Collections.sort(inboxMessages, (o1, o2) -> o2.getMessage().getCreatedAt().compareTo(o1.getMessage().getCreatedAt()));
+        for (LatestMessage latestmessage: inboxMessages) {
+            if (latestmessage.getUser().getUsername().equals(username)) {
+                res.add(new UserDTOForUser(latestmessage.getInboxUser()));
+            }
+            else {
+                res.add(new UserDTOForUser(latestmessage.getUser()));
+            }
+        }
+        return ResponseEntity.status(200).body(res); 
+    }
 }

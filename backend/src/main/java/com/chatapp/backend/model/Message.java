@@ -41,7 +41,7 @@ public class Message {
     private String contentURL;
 
     @Column(nullable = false)
-    private boolean oneTime;
+    private Boolean oneTime;
 
     @ManyToOne
     @JoinColumn(name = "userFrom_id", nullable = false)

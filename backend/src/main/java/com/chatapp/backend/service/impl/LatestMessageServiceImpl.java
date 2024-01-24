@@ -1,6 +1,8 @@
 package com.chatapp.backend.service.impl;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -20,8 +22,17 @@ public class LatestMessageServiceImpl implements LatestMessageService{
 
     @Override
     public List<LatestMessage> getByUser(User user) {
-        List<LatestMessage> latestMessages = latestMessageRepository.findByUser(user);
+        List<LatestMessage> latestMessages = latestMessageRepository.findByUserOrInboxUser(user, user);
         return latestMessages;
+    }
+
+    @Override
+    public LatestMessage getByUsers(User user, User inboxUser) {
+        Optional<LatestMessage> latestMessage = latestMessageRepository.findByUserAndInboxUserOrUserAndInboxUser(user, inboxUser, inboxUser, user);
+        if (latestMessage.isPresent()) {
+            return latestMessage.get();
+        }
+        else throw new NoSuchElementException();
     }
 
     @Override

@@ -21,6 +21,16 @@ public class UserServiceImpl implements UserService{
     private BCryptPasswordEncoder passwordEncoder;
 
     @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).get();
+    }
+
+    @Override
+    public String getUsernameFromId(Long id) {
+        return userRepository.findById(id).get().getUsername();
+    }
+
+    @Override
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
